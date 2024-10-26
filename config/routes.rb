@@ -1,6 +1,12 @@
 Rails.application.routes.draw do
   root "posts#index"
-  resources :posts
+
+  resources :posts do
+    member do
+      post "like",     to: "posts#like"
+      delete "unlike", to: "posts#unlike"
+    end
+  end
 
   if Rails.env.development? || Rails.env.test?
     mount Railsui::Engine, at: "/railsui"

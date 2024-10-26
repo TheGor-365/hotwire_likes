@@ -1,4 +1,5 @@
-<article id="<%= dom_id post %>" class="py-6 prose dark:prose-invert">
+<%= turbo_frame_tag dom_id(post) do %>
+  <article class="py-6 prose dark:prose-invert">
     <p class="mb-0 font-semibold">
       Title
     </p>
@@ -12,9 +13,26 @@
       <%= post.content %>
     </p>
 
-   <p>
-    <%= link_to "View Post", post, class: "underline" %>
-  </p>
+    <p>
+      <%= link_to "View Post", post, class: "underline" %>
+    </p>
 
-  <time class="text-slate-600 dark:text-slate-400 text-xs mt-2" datetime="<%= post.created_at.to_formatted_s(:long) %>">Created <%= time_ago_in_words(post.created_at) + " ago" %></time>
-</article>
+    <time class="text-slate-600 dark:text-slate-400 text-xs mt-2" datetime="<%= post.created_at.to_formatted_s(:long) %>">
+      Created <%= time_ago_in_words(post.created_at) + " ago" %>
+    </time>
+
+    <p>
+      <%= pluralize(post.likes.size, 'like') %>
+    </p>
+
+    <% if user_signed_in? %>
+      <% if current_user && post.likes.exists?(user_id: current_user.id) %>
+        <%= button_to "Unlike", unlike_post_path(post), method: :delete, class: "text-rose-600" %>
+      <% else %>
+        <%= button_to "Like", like_post_path(post), method: :post, class: "underline" %>
+      <% end %>
+    <% else %>
+      <%= link_to "Like", new_user_session_path, class: "underline", data: { turbo_frame: "_top" } %>
+    <% end %>
+  </article>
+<% end %>

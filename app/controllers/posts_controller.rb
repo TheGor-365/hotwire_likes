@@ -1,5 +1,6 @@
 class PostsController < ApplicationController
-  before_action :set_post, only: %i[ show edit update destroy ]
+  before_action :set_post, only: %i[ show edit update destroy like unlike ]
+  before_action :authenticate_user!, except: %i[ index show ]
 
   # GET /posts or /posts.json
   def index
@@ -57,14 +58,27 @@ class PostsController < ApplicationController
     end
   end
 
-  private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_post
-      @post = Post.find(params[:id])
-    end
+  def like
+    current_user.likes.create(likeable: @post)
+    render partial: "posts/post", locals: { post: @post }
+    # restpod_to do |format|
+    #   format.turbo_stream
+    # end
+  end
 
-    # Only allow a list of trusted parameters through.
-    def post_params
-      params.require(:post).permit(:title, :content)
-    end
+  def unlike
+    current_user.likes.find_by(likeable: @post).destroy
+    render partial: "posts/post", locals: { post: @post }
+  end
+
+  private
+  # Use callbacks to share common setup or constraints between actions.
+  def set_post
+    @post = Post.find(params[:id])
+  end
+
+  # Only allow a list of trusted parameters through.
+  def post_params
+    params.require(:post).permit(:title, :content)
+  end
 end
